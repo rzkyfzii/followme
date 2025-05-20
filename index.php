@@ -1,9 +1,14 @@
-<?php require 'function.php'; ?>
-<?php include 'layout/header.php'; ?>
-<?php include 'layout/sidebar.php'; ?>
-<?php include 'auth.php'; ?>
+<?php
+require 'function.php';  // koneksi, fungsi, dll
+
+include 'auth.php';      // cek login, session_start() harus di sini
+
+include 'layout/header.php';   // output HTML dimulai dari sini
+include 'layout/sidebar.php';
+?>
 
 <h1>Welcome to Dashboard</h1>
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById("sidebarToggle");
@@ -18,6 +23,5 @@
     }
   });
 </script>
-
 
 <?php include 'layout/footer.php'; ?>

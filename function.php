@@ -12,60 +12,50 @@ if (!$conn) {
 }
 
 
-
-// tambah barang gudang a
-if (isset($_POST['submit'])) {
+// tambah barang gudang a botol
+if (isset($_POST['submitbotol'])) {
     $inputTanggal = !empty($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d H:i:s');
     $tanggal = date('Y-m-d H:i:s', strtotime($inputTanggal));
 
-    $namabarang = $_POST['namabarang'] ?: 0;
-    $keterangan = $_POST['keterangan'] ?: 0;
-    $deskripsi = $_POST['deskripsi'] ?: 0;
+    // Ambil data dari form
+    $po = $_POST['po'] ?: '';
+    $namabarang = $_POST['namabarang'] ?: '';
+    $keterangan = $_POST['keterangan'] ?: '';
+    $penerima = $_POST['penerima'] ?: '';
     $botol = $_POST['botol'] ?: 0;
     $varian = $_POST['varian'] ?: 0;
-    $sprayer = $_POST['sprayer'] ?: 0;
-    $ring = $_POST['ring'] ?: 0;
-    $tutup = $_POST['tutup'] ?: 0;
-    $innerBox = $_POST['innerBox'] ?: 0;
-    $outerBox = $_POST['outerBox'] ?: 0;
-    $partisi = $_POST['partisi'] ?: 0;
 
-    $check = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND keterangan = '$keterangan' AND deskripsi = '$deskripsi' LIMIT 1");
+    // Pengecekan apakah barang dengan PO, Nama, dan Varian sudah ada
+    $check = mysqli_query($conn, "SELECT * FROM botol_a 
+        WHERE po = '$po' AND namabarang = '$namabarang' AND varian = '$varian' LIMIT 1");
 
     if (mysqli_num_rows($check) > 0) {
-        // Jika sudah ada, update
+        // Jika sudah ada, update stok-nya
         $existing = mysqli_fetch_assoc($check);
-        $idbarang = $existing['idbarang']; // Simpan untuk mutasi nanti
+        $idbarang = $existing['idbarang'];
 
-        $update = mysqli_query($conn, "UPDATE stock SET 
+        $update = mysqli_query($conn, "UPDATE botol_a SET 
             botol = botol + $botol,
-            varian = varian + $varian,
-            sprayer = sprayer + $sprayer,
-            ring = ring + $ring,
-            tutup = tutup + $tutup,
-            innerBox = innerBox + $innerBox,
-            outerBox = outerBox + $outerBox,
-            partisi = partisi + $partisi,
             tanggal = '$tanggal'
             WHERE idbarang = '$idbarang'");
 
         if ($update) {
-            header("Location: gudang_a.php");
+            header("Location: botol_a.php");
             exit();
         } else {
             echo "Gagal update barang: " . mysqli_error($conn);
         }
     } else {
-        // Generate ID baru
+        // Jika belum ada, insert baru
         $idbarang = uniqid("BRG-");
 
-        $insert = mysqli_query($conn, "INSERT INTO stock 
-            (idbarang, namabarang, keterangan, deskripsi, botol, varian, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal) 
+        $insert = mysqli_query($conn, "INSERT INTO botol_a
+            (idbarang, po, namabarang, keterangan, penerima, botol, varian, tanggal) 
             VALUES 
-            ('$idb', '$namabarang', '$keterangan', '$deskripsi', '$botol', '$varian', '$sprayer', '$ring', '$tutup', '$innerBox', '$outerBox', '$partisi', '$tanggal')");
+            ('$idbarang', '$po', '$namabarang', '$keterangan', '$penerima', '$botol', '$varian', '$tanggal')");
 
         if ($insert) {
-            header("Location: gudang_a.php");
+            header("Location: botol_a.php");
             exit();
         } else {
             echo "Gagal tambah barang: " . mysqli_error($conn);
@@ -73,173 +63,248 @@ if (isset($_POST['submit'])) {
     }
 }
 
-
-// tambah barang gudang c
-if (isset($_POST['submitC'])) {
-    // Ambil tanggal, jika kosong gunakan tanggal saat ini
-    $inputTanggal = !empty($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d H:i:s');
-    $tanggal = date('Y-m-d H:i:s', strtotime($inputTanggal));
-
-    // Ambil input lainnya dan pastikan nilainya
-    $namabarang = $_POST['namabarang'] ?: 0;
-    $keterangan = $_POST['keterangan'] ?: 0;
-    $deskripsi = $_POST['deskripsi'] ?: 0;
-    $botol = $_POST['botol'] ?: 0;
-    $varian = $_POST['varian'] ?: 0;
-    $sprayer = $_POST['sprayer'] ?: 0;
-    $ring = $_POST['ring'] ?: 0;
-    $tutup = $_POST['tutup'] ?: 0;
-    $innerBox = $_POST['innerBox'] ?: 0;
-    $outerBox = $_POST['outerBox'] ?: 0;
-    $partisi = $_POST['partisi'] ?: 0;
-
-    // Cek apakah ada barang dengan kombinasi nama, keterangan, dan deskripsi yang sama
-    $check = mysqli_query($conn, "SELECT * FROM gudangc WHERE namabarang = '$namabarang' AND keterangan = '$keterangan' AND deskripsi = '$deskripsi' LIMIT 1");
-
-    if (mysqli_num_rows($check) > 0) {
-        // Jika sudah ada, update stok (ditambah)
-        $existing = mysqli_fetch_assoc($check);
-
-        // Update stok dengan menambahkan nilai yang baru
-        $update = mysqli_query($conn, "UPDATE gudangc SET 
-            botol = botol + $botol,
-            varian = varian + $varian,
-            sprayer = sprayer + $sprayer,
-            ring = ring + $ring,
-            tutup = tutup + $tutup,
-            innerBox = innerBox + $innerBox,
-            outerBox = outerBox + $outerBox,
-            partisi = partisi + $partisi,
-            tanggal = '$tanggal'
-            WHERE namabarang = '$namabarang' AND keterangan = '$keterangan' AND deskripsi = '$deskripsi'
-        ");
-
-        // Mengecek apakah update berhasil
-        if ($update) {
-            header("Location: gudang_c.php");
-            exit();
-        } else {
-            echo "Gagal update barang: " . mysqli_error($conn);
-        }
-    } else {
-        // Jika belum ada, insert data baru
-        $insert = mysqli_query($conn, "INSERT INTO gudangc 
-            (namabarang, keterangan, deskripsi, botol, varian, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal) 
-            VALUES 
-            ('$namabarang', '$keterangan', '$deskripsi', '$botol', '$varian', '$sprayer', '$ring', '$tutup', '$innerBox', '$outerBox', '$partisi', '$tanggal')");
-
-        // Mengecek apakah insert berhasil
-        if ($insert) {
-            header("Location: gudang_c.php");
-            exit();
-        } else {
-            echo "Gagal tambah barang: " . mysqli_error($conn);
-        }
-    }
-}
-
-
-//update barang gudang a
-if (isset($_POST['updatebarang'])) {
+//update barang botol gudang a
+if (isset($_POST['updatebarangbotol'])) {
     // Ambil data dari form
     $idb = $_POST['idb'];
+    $po = isset($_POST['po']) ? $_POST['po'] : '';
     $namabarang = isset($_POST['namabarang']) ? $_POST['namabarang'] : '';
     $keterangan = isset($_POST['keterangan']) ? $_POST['keterangan'] : '';
-    $deskripsi = isset($_POST['deskripsi']) ? $_POST['deskripsi'] : '';
+    $penerima= isset($_POST['penerima']) ? $_POST['penerima'] : '';
     $botol = isset($_POST['botol']) ? $_POST['botol'] : 0;
     $varian = isset($_POST['varian']) ? $_POST['varian'] : '';
-    $sprayer = isset($_POST['sprayer']) ? $_POST['sprayer'] : '';
-    $ring = isset($_POST['ring']) ? $_POST['ring'] : '';
-    $tutup = isset($_POST['tutup']) ? $_POST['tutup'] : '';
-    $innerBox = isset($_POST['innerBox']) ? $_POST['innerBox'] : 0;
-    $outerBox = isset($_POST['outerBox']) ? $_POST['outerBox'] : 0;
-    $partisi = isset($_POST['partisi']) ? $_POST['partisi'] : 0;
 
     // Pastikan tanggal tidak berubah
     // Hanya memperbarui kolom lain selain tanggal
-    $update = mysqli_query($conn, "UPDATE stock SET 
+    $update = mysqli_query($conn, "UPDATE botol_a SET 
+        po='$po',
         namabarang='$namabarang',
         keterangan='$keterangan',
-        deskripsi='$deskripsi',
+        penerima='$penerima',
         botol='$botol',
-        varian='$varian',
-        sprayer='$sprayer',
-        ring='$ring',
-        tutup='$tutup',
-        innerBox='$innerBox',
-        outerBox='$outerBox',
-        partisi='$partisi'
+        varian='$varian'
         WHERE idbarang='$idb'");
 
     if($update){
-        header("Location: gudang_a.php");
+        header("Location: botol_a.php");
         exit();
     } else {
         echo "Gagal update: " . mysqli_error($conn);
     }
 }
 
-//delete barang gudang a
-if(isset($_POST['hapusbarang'])){
+// Hapus barang dari botol_a (Gudang A)
+if(isset($_POST['hapusbarangbotol'])){
     $idb = $_POST['idb'];
 
-    $hapus = mysqli_query($conn, "delete from stock where idbarang='$idb'");
+    $hapus = mysqli_query($conn, "delete from botol_a where idbarang='$idb'");
     if($hapus){
-        header("Location: gudang_a.php");
+        header("Location: botol_a.php");
         exit(); // Tambahkan exit setelah header
     } else {
         echo "Gagal menambahkan data: " . mysqli_error($conn);
     }
 };
 
-//edit barang gudang c
-if (isset($_POST['updatebarangc'])) {
+// tambah barang komponen gudang a
+if (isset($_POST['submitkomponen'])) {
+    $inputTanggal = !empty($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d H:i:s');
+    $tanggal = date('Y-m-d H:i:s', strtotime($inputTanggal));
+
+    // Ambil data dari form
+    $po = $_POST['po'] ?: '';
+    $namabarang = $_POST['namabarang'] ?: '';
+    $keterangan = $_POST['keterangan'] ?: '';
+    $deskripsi = $_POST['deskripsi'] ?: '';
+    $varian = $_POST['varian'] ?: 0;
+    $sprayer = $_POST['sprayer'] ?: 0;
+    $ring = $_POST['ring'] ?: 0;
+    $tutup = $_POST['tutup'] ?: 0;
+
+    // Pengecekan apakah barang dengan PO, Nama, dan Varian sudah ada
+    $check = mysqli_query($conn, "SELECT * FROM komponen_a 
+        WHERE po = '$po' AND namabarang = '$namabarang' AND varian = '$varian' LIMIT 1");
+
+    if (mysqli_num_rows($check) > 0) {
+        // Jika sudah ada, update stok-nya
+        $existing = mysqli_fetch_assoc($check);
+        $idbarang = $existing['idbarang'];
+
+        $update = mysqli_query($conn, "UPDATE komponen_a SET 
+            sprayer = sprayer + $sprayer,
+            ring = ring + $ring,
+            tutup = tutup + $tutup,
+            tanggal = '$tanggal'
+            WHERE idbarang = '$idbarang'");
+
+        if ($update) {
+            header("Location: komponen_a.php");
+            exit();
+        } else {
+            echo "Gagal update barang: " . mysqli_error($conn);
+        }
+    } else {
+        // Jika belum ada, insert baru
+        $idbarang = uniqid("BRG-");
+
+        $insert = mysqli_query($conn, "INSERT INTO komponen_a
+            (idbarang, po, namabarang, keterangan, deskripsi, varian, tanggal, sprayer, ring, tutup) 
+            VALUES 
+            ('$idbarang', '$po', '$namabarang', '$keterangan', '$deskripsi', '$varian', '$tanggal', '$sprayer', '$ring', '$tutup') ");
+
+        if ($insert) {
+            header("Location: komponen_a.php");
+            exit();
+        } else {
+            echo "Gagal tambah barang: " . mysqli_error($conn);
+        }
+    }
+}
+
+//update barang komponen gudang a
+if (isset($_POST['updatebarangkomponen'])) {
     // Ambil data dari form
     $idb = $_POST['idb'];
+    $po = isset($_POST['po']) ? $_POST['po'] : '';
     $namabarang = isset($_POST['namabarang']) ? $_POST['namabarang'] : '';
     $keterangan = isset($_POST['keterangan']) ? $_POST['keterangan'] : '';
     $deskripsi = isset($_POST['deskripsi']) ? $_POST['deskripsi'] : '';
-    $botol = isset($_POST['botol']) ? $_POST['botol'] : 0;
     $varian = isset($_POST['varian']) ? $_POST['varian'] : '';
-    $sprayer = isset($_POST['sprayer']) ? $_POST['sprayer'] : '';
-    $ring = isset($_POST['ring']) ? $_POST['ring'] : '';
-    $tutup = isset($_POST['tutup']) ? $_POST['tutup'] : '';
-    $innerBox = isset($_POST['innerBox']) ? $_POST['innerBox'] : 0;
-    $outerBox = isset($_POST['outerBox']) ? $_POST['outerBox'] : 0;
-    $partisi = isset($_POST['partisi']) ? $_POST['partisi'] : 0;
+    $sprayer = isset($_POST['sprayer']) ? $_POST['sprayer'] : 0;
+    $ring = isset($_POST['ring']) ? $_POST['ring'] : 0;
+    $tutup = isset($_POST['tutup']) ? $_POST['tutup'] : 0;
 
     // Pastikan tanggal tidak berubah
     // Hanya memperbarui kolom lain selain tanggal
-    $update = mysqli_query($conn, "UPDATE gudangc SET 
+    $update = mysqli_query($conn, "UPDATE komponen_a SET 
+        po='$po',
         namabarang='$namabarang',
         keterangan='$keterangan',
         deskripsi='$deskripsi',
-        botol='$botol',
         varian='$varian',
         sprayer='$sprayer',
         ring='$ring',
-        tutup='$tutup',
-        innerBox='$innerBox',
-        outerBox='$outerBox',
-        partisi='$partisi'
+        tutup='$tutup'
         WHERE idbarang='$idb'");
 
     if($update){
-        header("Location: gudang_c.php");
+        header("Location: komponen_a.php");
+        exit();
+    } else {
+        echo "Gagal update: " . mysqli_error($conn);
+    }
+}
+ 
+// delete barang komponen gudang a
+if(isset($_POST['hapusbarangkomponen'])){
+    $idb = $_POST['idb'];
+
+    $hapus = mysqli_query($conn, "delete from komponen_a where idbarang='$idb'");
+    if($hapus){
+        header("Location: komponen_a.php");
+        exit(); // Tambahkan exit setelah header
+    } else {
+        echo "Gagal menambahkan data: " . mysqli_error($conn);
+    }
+};
+
+//submit box a
+if (isset($_POST['submitbox'])) {
+    $inputTanggal = !empty($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d H:i:s');
+    $tanggal = date('Y-m-d H:i:s', strtotime($inputTanggal));
+
+    // Ambil data dari form
+    $po = $_POST['po'] ?: '';
+    $namabarang = $_POST['namabarang'] ?: '';
+    $keterangan = $_POST['keterangan'] ?: '';
+    $penerima = $_POST['penerima'] ?: '';
+    $varian = $_POST['varian'] ?: 0;
+    $innerBox = $_POST['innerBox'] ?: 0;
+    $outerBox = $_POST['outerBox'] ?: 0;
+    $partisi = $_POST['partisi'] ?: 0;
+
+    // Pengecekan apakah barang dengan PO, Nama, dan Varian sudah ada
+    $check = mysqli_query($conn, "SELECT * FROM box_a 
+        WHERE po = '$po' AND namabarang = '$namabarang' AND varian = '$varian' LIMIT 1");
+
+    if (mysqli_num_rows($check) > 0) {
+        // Jika sudah ada, update stok-nya
+        $existing = mysqli_fetch_assoc($check);
+        $idbarang = $existing['idbarang'];
+
+        $update = mysqli_query($conn, "UPDATE box_a SET 
+            innerBox = innerBox + $inerBox,
+            outerBox = outerBox + $outerBox,
+            partisi = partisi + $partisi,
+            tanggal = '$tanggal'
+            WHERE idbarang = '$idbarang'");
+
+        if ($update) {
+            header("Location: box_a.php");
+            exit();
+        } else {
+            echo "Gagal update barang: " . mysqli_error($conn);
+        }
+    } else {
+        // Jika belum ada, insert baru
+        $idbarang = uniqid("BRG-");
+
+        $insert = mysqli_query($conn, "INSERT INTO box_a
+            (idbarang, po, namabarang, keterangan, penerima, varian, tanggal, innerBox, outerBox, partisi) 
+            VALUES 
+            ('$idbarang', '$po', '$namabarang', '$keterangan', '$penerima', '$varian', '$tanggal', '$innerBox', '$outerBox', '$partisi')");
+
+        if ($insert) {
+            header("Location: box_a.php");
+            exit();
+        } else {
+            echo "Gagal tambah barang: " . mysqli_error($conn);
+        }
+    }
+}
+
+//update box a
+if (isset($_POST['updatebarangbox'])) {
+    $idb = mysqli_real_escape_string($conn, $_POST['idb'] ?? '');
+    if (!$idb) {
+        die('ID barang tidak valid');
+    }
+    
+    $varian = mysqli_real_escape_string($conn, $_POST['varian'] ?? '');
+    $po = mysqli_real_escape_string($conn, $_POST['po'] ?? '');
+    $namabarang = mysqli_real_escape_string($conn, $_POST['namabarang'] ?? '');
+    $keterangan = mysqli_real_escape_string($conn, $_POST['keterangan'] ?? '');
+    $penerima = mysqli_real_escape_string($conn, $_POST['penerima'] ?? '');
+    $innerBox = (int)($_POST['innerBox'] ?? 0);
+    $outerBox = (int)($_POST['outerBox'] ?? 0);
+    $partisi = (int)($_POST['partisi'] ?? 0);
+
+    $update = mysqli_query($conn, "UPDATE box_a SET 
+        po='$po',
+        namabarang='$namabarang',
+        keterangan='$keterangan',
+        penerima='$penerima',
+        varian='$varian',
+        innerBox=$innerBox,
+        outerBox=$outerBox,
+        partisi=$partisi
+        WHERE idbarang='$idb'");
+
+    if ($update) {
+        header("Location: box_a.php");
         exit();
     } else {
         echo "Gagal update: " . mysqli_error($conn);
     }
 }
 
-   
-// delete barang masuk gudang c
-if(isset($_POST['hapusbarangc'])){
+//delete box a
+if(isset($_POST['hapusbarangbox'])){
     $idb = $_POST['idb'];
 
-    $hapus = mysqli_query($conn, "delete from gudangc where idbarang='$idb'");
+    $hapus = mysqli_query($conn, "delete from box_a where idbarang='$idb'");
     if($hapus){
-        header("Location: gudang_c.php");
+        header("Location: box_a.php");
         exit(); // Tambahkan exit setelah header
     } else {
         echo "Gagal menambahkan data: " . mysqli_error($conn);
@@ -248,113 +313,91 @@ if(isset($_POST['hapusbarangc'])){
 
 // tambah barang produksi a
 if (isset($_POST['A'])) {
-    $namabarang = $_POST['namabarang'];
+    // Ambil dan sanitasi input
+    $namabarang = mysqli_real_escape_string($conn, $_POST['namabarang']);
+    $varian = mysqli_real_escape_string($conn, $_POST['varian']);
+    $po = mysqli_real_escape_string($conn, $_POST['po']);
     $botol = (int)$_POST['botol'];
-    $varian = mysqli_real_escape_string($conn, $_POST['varian']); // pastikan varian disanitasi
     $sprayer = (int)$_POST['sprayer'];
     $ring = (int)$_POST['ring'];
     $tutup = (int)$_POST['tutup'];
     $innerBox = (int)$_POST['innerBox'];
     $outerBox = (int)$_POST['outerBox'];
     $partisi = (int)$_POST['partisi'];
-    $gudang = $_POST['gudang'];
+    $tanggal = date("Y-m-d");
 
-    // Tentukan nama tabel gudang
-    $gudangTable = ($gudang == 'A') ? 'stock' : 'gudangc';
+    // Ambil data stok dari ketiga tabel berdasarkan namabarang, varian, po
+    $q_botol = mysqli_query($conn, "SELECT * FROM botol_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
+    $q_komponen = mysqli_query($conn, "SELECT * FROM komponen_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
+    $q_box = mysqli_query($conn, "SELECT * FROM box_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
 
-    // Ambil stok barang dari tabel gudang
-    $checkStock = mysqli_query($conn, "SELECT * FROM $gudangTable WHERE namabarang = '$namabarang' LIMIT 1");
+    if (mysqli_num_rows($q_botol) > 0 && mysqli_num_rows($q_komponen) > 0 && mysqli_num_rows($q_box) > 0) {
+        $stok_botol = mysqli_fetch_assoc($q_botol);
+        $stok_komponen = mysqli_fetch_assoc($q_komponen);
+        $stok_box = mysqli_fetch_assoc($q_box);
 
-    if (mysqli_num_rows($checkStock) > 0) {
-        $barang = mysqli_fetch_assoc($checkStock);
-        $idbarang = $barang['idbarang'];
+        // Validasi stok cukup
+        $kurang = [];
+        if ($stok_botol['botol'] < $botol) $kurang[] = 'Botol';
+        if ($stok_komponen['sprayer'] < $sprayer) $kurang[] = 'Sprayer';
+        if ($stok_komponen['ring'] < $ring) $kurang[] = 'Ring';
+        if ($stok_komponen['tutup'] < $tutup) $kurang[] = 'Tutup';
+        if ($stok_box['innerBox'] < $innerBox) $kurang[] = 'Inner Box';
+        if ($stok_box['outerBox'] < $outerBox) $kurang[] = 'Outer Box';
+        if ($stok_box['partisi'] < $partisi) $kurang[] = 'Partisi';
 
-        // Cek ketersediaan masing-masing komponen
-        $cukup = true;
-        $pesanKurang = "";
-
-        if ($barang['botol'] < $botol) {
-            $cukup = false;
-            $pesanKurang .= "Botol kurang. ";
-        }
-        if ($barang['varian'] < $varian) {
-            $cukup = false;
-            $pesanKurang .= "varian kurang. ";
-        }
-        if ($barang['sprayer'] < $sprayer) {
-            $cukup = false;
-            $pesanKurang .= "Sprayer kurang. ";
-        }
-        if ($barang['ring'] < $ring) {
-            $cukup = false;
-            $pesanKurang .= "Ring kurang. ";
-        }
-        if ($barang['tutup'] < $tutup) {
-            $cukup = false;
-            $pesanKurang .= "Tutup kurang. ";
-        }
-        if ($barang['innerBox'] < $innerBox) {
-            $cukup = false;
-            $pesanKurang .= "InnerBox kurang. ";
-        }
-        if ($barang['outerBox'] < $outerBox) {
-            $cukup = false;
-            $pesanKurang .= "OuterBox kurang. ";
-        }
-        if ($barang['partisi'] < $partisi) {
-            $cukup = false;
-            $pesanKurang .= "Partisi kurang. ";
+        if (count($kurang) > 0) {
+            echo "❌ Stok tidak mencukupi untuk: " . implode(', ', $kurang);
+            exit;
         }
 
-        if ($cukup) {
-            // Lanjut update stok
-            $update = mysqli_query($conn, "UPDATE $gudangTable SET 
-                botol = botol - $botol,
-                sprayer = sprayer - $sprayer,
-                ring = ring - $ring,
-                tutup = tutup - $tutup,
-                innerBox = innerBox - $innerBox,
-                outerBox = outerBox - $outerBox,
-                partisi = partisi - $partisi
-                WHERE idbarang = '$idbarang'
-            ");
+        // Kurangi stok di botol_a
+        $update_botol = mysqli_query($conn, "UPDATE botol_a SET 
+            botol = botol - $botol 
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
-            if ($update) {
-                // Masukkan ke produksi_a
-                // Cek apakah barang dengan varian sama sudah ada di produksi_a hari ini
-                $tanggalHariIni = date("Y-m-d");
-                $cekProduksi = mysqli_query($conn, "SELECT * FROM produksi_a 
-                    WHERE namabarang = '$namabarang' AND varian = '$varian' AND DATE(tanggal) = '$tanggalHariIni' LIMIT 1");
+        // Kurangi stok di komponen_a
+        $update_komponen = mysqli_query($conn, "UPDATE komponen_a SET 
+            sprayer = sprayer - $sprayer,
+            ring = ring - $ring,
+            tutup = tutup - $tutup
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
-                if (mysqli_num_rows($cekProduksi) > 0) {
-                    // Jika sudah ada, update jumlah komponen
-                    $row = mysqli_fetch_assoc($cekProduksi);
-                    $updateProduksi = mysqli_query($conn, "UPDATE produksi_a SET 
-                        botol = botol + $botol,
-                        sprayer = sprayer + $sprayer,
-                        ring = ring + $ring,
-                        tutup = tutup + $tutup,
-                        innerBox = innerBox + $innerBox,
-                        outerBox = outerBox + $outerBox,
-                        partisi = partisi + $partisi
-                        WHERE idbarang = '$idbarang' AND varian = '$varian' AND DATE(tanggal) = '$tanggalHariIni'
-                    ");
-                } else {
-                    // Jika belum ada, insert baru
-                    $insert = mysqli_query($conn, "INSERT INTO produksi_a 
-                        (idbarang, namabarang, botol, varian, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal)
-                        VALUES ('$idbarang', '$namabarang', '$botol', '$varian', '$sprayer', '$ring', '$tutup', '$innerBox', '$outerBox', '$partisi', NOW())
-                    ");
-                }
+        // Kurangi stok di box_a
+        $update_box = mysqli_query($conn, "UPDATE box_a SET 
+            innerBox = innerBox - $innerBox,
+            outerBox = outerBox - $outerBox,
+            partisi = partisi - $partisi
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
+        if ($update_botol && $update_komponen && $update_box) {
+            // Masukkan ke produksi_a, cek dulu apakah sudah ada untuk tanggal dan varian yang sama
+            $cekProd = mysqli_query($conn, "SELECT * FROM produksi_a WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po' AND DATE(tanggal) = '$tanggal' LIMIT 1");
+
+            if (mysqli_num_rows($cekProd) > 0) {
+                // Update produksi
+                $updateProd = mysqli_query($conn, "UPDATE produksi_a SET
+                    botol = botol + $botol,
+                    sprayer = sprayer + $sprayer,
+                    ring = ring + $ring,
+                    tutup = tutup + $tutup,
+                    innerBox = innerBox + $innerBox,
+                    outerBox = outerBox + $outerBox,
+                    partisi = partisi + $partisi
+                    WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po' AND DATE(tanggal) = '$tanggal'");
             } else {
-                
+                // Insert produksi baru
+                $insertProd = mysqli_query($conn, "INSERT INTO produksi_a 
+                    (namabarang, varian, po, botol, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal) VALUES
+                    ('$namabarang', '$varian', '$po', $botol, $sprayer, $ring, $tutup, $innerBox, $outerBox, $partisi, NOW())");
             }
-        } else {
+
            
+        } else {
+            echo "❌ Gagal update stok di salah satu tabel.";
         }
     } else {
-        
+        echo "❌ Data tidak lengkap. Barang harus ada di botol_a, komponen_a, dan box_a.";
     }
 }
 
@@ -366,166 +409,135 @@ if (isset($_POST['hapusbarangproduksia'])) {
     $get = mysqli_query($conn, "SELECT * FROM produksi_a WHERE idbarang='$idb'");
     $data = mysqli_fetch_assoc($get);
 
-    $namabarang = trim($data['namabarang']);
-    $varian = trim($data['varian']);
-    
-    // Ambil keterangan dan deskripsi asli dari stock (gudang_a)
-    $getGudang = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND varian = '$varian'");
-    $gudangData = mysqli_fetch_assoc($getGudang);
-
-
-    // Ambil keterangan dan deskripsi yang asli dari gudang
-    $keterangan = $gudangData['keterangan'];
-    $deskripsi = $gudangData['deskripsi'];
-
-    // Cek apakah barang sudah ada di stock
-    $cek = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND varian = '$varian'");
-
-    if (mysqli_num_rows($cek) > 0) {
-        // Update data stock yang sudah ada
-        $update = mysqli_query($conn, "UPDATE stock SET 
-            botol = botol + {$data['botol']},
-            sprayer = sprayer + {$data['sprayer']},
-            ring = ring + {$data['ring']},
-            tutup = tutup + {$data['tutup']},
-            innerBox = innerBox + {$data['innerBox']},
-            outerBox = outerBox + {$data['outerBox']},
-            partisi = partisi + {$data['partisi']},
-            keterangan = '$keterangan',
-            deskripsi = '$deskripsi'
-            WHERE namabarang = '$namabarang' AND varian = '$varian'");
-    } else {
-        // Jika barang belum ada, insert data baru ke stock
-        $update = mysqli_query($conn, "INSERT INTO stock 
-            (namabarang, varian, keterangan, deskripsi, botol, sprayer, ring, tutup, innerBox, outerBox, partisi) 
-            VALUES 
-            ('$namabarang', '$varian', '$keterangan', '$deskripsi', {$data['botol']}, {$data['sprayer']}, {$data['ring']}, {$data['tutup']}, {$data['innerBox']}, {$data['outerBox']}, {$data['partisi']})");
+    if (!$data) {
+        echo "Data produksi tidak ditemukan.";
+        exit;
     }
 
-    // Proses hapus data dari produksi_a jika update berhasil
-    if ($update) {
+    $namabarang = trim($data['namabarang']);
+    $varian = trim($data['varian']);
+    $po = trim($data['po']); // pastikan ada kolom po di produksi_a
+
+    // Update stok botol_a
+    $updateBotol = mysqli_query($conn, "UPDATE botol_a SET 
+        botol = botol + {$data['botol']} 
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    // Update stok komponen_a
+    $updateKomponen = mysqli_query($conn, "UPDATE komponen_a SET 
+        sprayer = sprayer + {$data['sprayer']},
+        ring = ring + {$data['ring']},
+        tutup = tutup + {$data['tutup']}
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    // Update stok box_a
+    $updateBox = mysqli_query($conn, "UPDATE box_a SET 
+        innerBox = innerBox + {$data['innerBox']},
+        outerBox = outerBox + {$data['outerBox']},
+        partisi = partisi + {$data['partisi']}
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    if ($updateBotol && $updateKomponen && $updateBox) {
+        // Jika semua update berhasil, hapus produksi_a
         $hapus = mysqli_query($conn, "DELETE FROM produksi_a WHERE idbarang='$idb'");
         if ($hapus) {
             header("Location: produksi_a.php");
             exit();
         } else {
-            echo "Gagal hapus data: " . mysqli_error($conn);
+            echo "Gagal hapus data produksi: " . mysqli_error($conn);
         }
     } else {
-        echo "Gagal update stock: " . mysqli_error($conn);
+        echo "Gagal update stok komponen: " . mysqli_error($conn);
     }
 }
 
-
-// tambah barang produksi b
+//tambah barang guda b
 if (isset($_POST['B'])) {
-    $namabarang = $_POST['namabarang'];
+    // Ambil dan sanitasi input
+    $namabarang = mysqli_real_escape_string($conn, $_POST['namabarang']);
+    $varian = mysqli_real_escape_string($conn, $_POST['varian']);
+    $po = mysqli_real_escape_string($conn, $_POST['po']);
     $botol = (int)$_POST['botol'];
-    $varian = mysqli_real_escape_string($conn, $_POST['varian']); // pastikan varian disanitasi
     $sprayer = (int)$_POST['sprayer'];
     $ring = (int)$_POST['ring'];
     $tutup = (int)$_POST['tutup'];
     $innerBox = (int)$_POST['innerBox'];
     $outerBox = (int)$_POST['outerBox'];
     $partisi = (int)$_POST['partisi'];
-    $gudang = $_POST['gudang'];
+    $tanggal = date("Y-m-d");
 
-    // Tentukan nama tabel gudang
-    $gudangTable = ($gudang == 'A') ? 'stock' : 'gudangc';
+    // Ambil data stok dari ketiga tabel berdasarkan namabarang, varian, po
+    $q_botol = mysqli_query($conn, "SELECT * FROM botol_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
+    $q_komponen = mysqli_query($conn, "SELECT * FROM komponen_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
+    $q_box = mysqli_query($conn, "SELECT * FROM box_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
 
-    // Ambil stok barang dari tabel gudang
-    $checkStock = mysqli_query($conn, "SELECT * FROM $gudangTable WHERE namabarang = '$namabarang' LIMIT 1");
+    if (mysqli_num_rows($q_botol) > 0 && mysqli_num_rows($q_komponen) > 0 && mysqli_num_rows($q_box) > 0) {
+        $stok_botol = mysqli_fetch_assoc($q_botol);
+        $stok_komponen = mysqli_fetch_assoc($q_komponen);
+        $stok_box = mysqli_fetch_assoc($q_box);
 
-    if (mysqli_num_rows($checkStock) > 0) {
-        $barang = mysqli_fetch_assoc($checkStock);
-        $idbarang = $barang['idbarang'];
+        // Validasi stok cukup
+        $kurang = [];
+        if ($stok_botol['botol'] < $botol) $kurang[] = 'Botol';
+        if ($stok_komponen['sprayer'] < $sprayer) $kurang[] = 'Sprayer';
+        if ($stok_komponen['ring'] < $ring) $kurang[] = 'Ring';
+        if ($stok_komponen['tutup'] < $tutup) $kurang[] = 'Tutup';
+        if ($stok_box['innerBox'] < $innerBox) $kurang[] = 'Inner Box';
+        if ($stok_box['outerBox'] < $outerBox) $kurang[] = 'Outer Box';
+        if ($stok_box['partisi'] < $partisi) $kurang[] = 'Partisi';
 
-        // Cek ketersediaan masing-masing komponen
-        $cukup = true;
-        $pesanKurang = "";
-
-        if ($barang['botol'] < $botol) {
-            $cukup = false;
-            $pesanKurang .= "Botol kurang. ";
-        }
-        if ($barang['varian'] < $varian) {
-            $cukup = false;
-            $pesanKurang .= "varian kurang. ";
-        }
-        if ($barang['sprayer'] < $sprayer) {
-            $cukup = false;
-            $pesanKurang .= "Sprayer kurang. ";
-        }
-        if ($barang['ring'] < $ring) {
-            $cukup = false;
-            $pesanKurang .= "Ring kurang. ";
-        }
-        if ($barang['tutup'] < $tutup) {
-            $cukup = false;
-            $pesanKurang .= "Tutup kurang. ";
-        }
-        if ($barang['innerBox'] < $innerBox) {
-            $cukup = false;
-            $pesanKurang .= "InnerBox kurang. ";
-        }
-        if ($barang['outerBox'] < $outerBox) {
-            $cukup = false;
-            $pesanKurang .= "OuterBox kurang. ";
-        }
-        if ($barang['partisi'] < $partisi) {
-            $cukup = false;
-            $pesanKurang .= "Partisi kurang. ";
+        if (count($kurang) > 0) {
+            echo "❌ Stok tidak mencukupi untuk: " . implode(', ', $kurang);
+            exit;
         }
 
-        if ($cukup) {
-            // Lanjut update stok
-            $update = mysqli_query($conn, "UPDATE $gudangTable SET 
-                botol = botol - $botol,
-                sprayer = sprayer - $sprayer,
-                ring = ring - $ring,
-                tutup = tutup - $tutup,
-                innerBox = innerBox - $innerBox,
-                outerBox = outerBox - $outerBox,
-                partisi = partisi - $partisi
-                WHERE idbarang = '$idbarang'
-            ");
+        // Kurangi stok di botol_a
+        $update_botol = mysqli_query($conn, "UPDATE botol_a SET 
+            botol = botol - $botol 
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
-            if ($update) {
-                // Masukkan ke produksi_b
-                // Cek apakah barang dengan varian sama sudah ada di produksi_a hari ini
-                $tanggalHariIni = date("Y-m-d");
-                $cekProduksi = mysqli_query($conn, "SELECT * FROM produksi_b 
-                    WHERE namabarang = '$namabarang' AND varian = '$varian' AND DATE(tanggal) = '$tanggalHariIni' LIMIT 1");
+        // Kurangi stok di komponen_a
+        $update_komponen = mysqli_query($conn, "UPDATE komponen_a SET 
+            sprayer = sprayer - $sprayer,
+            ring = ring - $ring,
+            tutup = tutup - $tutup
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
-                if (mysqli_num_rows($cekProduksi) > 0) {
-                    // Jika sudah ada, update jumlah komponen
-                    $row = mysqli_fetch_assoc($cekProduksi);
-                    $updateProduksi = mysqli_query($conn, "UPDATE produksi_b SET 
-                        botol = botol + $botol,
-                        sprayer = sprayer + $sprayer,
-                        ring = ring + $ring,
-                        tutup = tutup + $tutup,
-                        innerBox = innerBox + $innerBox,
-                        outerBox = outerBox + $outerBox,
-                        partisi = partisi + $partisi
-                        WHERE idbarang = '$idbarang' AND varian = '$varian' AND DATE(tanggal) = '$tanggalHariIni'
-                    ");
-                } else {
-                    // Jika belum ada, insert baru
-                    $insert = mysqli_query($conn, "INSERT INTO produksi_b 
-                        (idbarang, namabarang, botol, varian, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal)
-                        VALUES ('$idbarang', '$namabarang', '$botol', '$varian', '$sprayer', '$ring', '$tutup', '$innerBox', '$outerBox', '$partisi', NOW())
-                    ");
-                }
+        // Kurangi stok di box_a
+        $update_box = mysqli_query($conn, "UPDATE box_a SET 
+            innerBox = innerBox - $innerBox,
+            outerBox = outerBox - $outerBox,
+            partisi = partisi - $partisi
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
+        if ($update_botol && $update_komponen && $update_box) {
+            // Masukkan ke produksi_a, cek dulu apakah sudah ada untuk tanggal dan varian yang sama
+            $cekProd = mysqli_query($conn, "SELECT * FROM produksi_b WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po' AND DATE(tanggal) = '$tanggal' LIMIT 1");
+
+            if (mysqli_num_rows($cekProd) > 0) {
+                // Update produksi
+                $updateProd = mysqli_query($conn, "UPDATE produksi_b SET
+                    botol = botol + $botol,
+                    sprayer = sprayer + $sprayer,
+                    ring = ring + $ring,
+                    tutup = tutup + $tutup,
+                    innerBox = innerBox + $innerBox,
+                    outerBox = outerBox + $outerBox,
+                    partisi = partisi + $partisi
+                    WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po' AND DATE(tanggal) = '$tanggal'");
             } else {
-                
+                // Insert produksi baru
+                $insertProd = mysqli_query($conn, "INSERT INTO produksi_b
+                    (namabarang, varian, po, botol, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal) VALUES
+                    ('$namabarang', '$varian', '$po', $botol, $sprayer, $ring, $tutup, $innerBox, $outerBox, $partisi, NOW())");
             }
-        } else {
+
            
+        } else {
+            echo "❌ Gagal update stok di salah satu tabel.";
         }
     } else {
-        
+        echo "❌ Data tidak lengkap. Barang harus ada di botol_a, komponen_a, dan box_a.";
     }
 }
 
@@ -533,168 +545,139 @@ if (isset($_POST['B'])) {
 if (isset($_POST['hapusbarangproduksib'])) {
     $idb = $_POST['idb'];
 
-    // Ambil data berdasarkan ID dari produksi_b
+    // Ambil data berdasarkan ID dari produksi_a
     $get = mysqli_query($conn, "SELECT * FROM produksi_b WHERE idbarang='$idb'");
     $data = mysqli_fetch_assoc($get);
 
-    $namabarang = trim($data['namabarang']);
-    $varian = trim($data['varian']);
-    
-    // Ambil keterangan dan deskripsi asli dari stock (gudang_b)
-    $getGudang = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND varian = '$varian'");
-    $gudangData = mysqli_fetch_assoc($getGudang);
-
-    // Ambil keterangan dan deskripsi yang asli dari gudang
-    $keterangan = $gudangData['keterangan'];
-    $deskripsi = $gudangData['deskripsi'];
-
-    // Cek apakah barang sudah ada di stock
-    $cek = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND varian = '$varian'");
-
-    if (mysqli_num_rows($cek) > 0) {
-        // Update data stock yang sudah ada
-        $update = mysqli_query($conn, "UPDATE stock SET 
-            botol = botol + {$data['botol']},
-            sprayer = sprayer + {$data['sprayer']},
-            ring = ring + {$data['ring']},
-            tutup = tutup + {$data['tutup']},
-            innerBox = innerBox + {$data['innerBox']},
-            outerBox = outerBox + {$data['outerBox']},
-            partisi = partisi + {$data['partisi']},
-            keterangan = '$keterangan',
-            deskripsi = '$deskripsi'
-            WHERE namabarang = '$namabarang' AND varian = '$varian'");
-    } else {
-        // Jika barang belum ada, insert data baru ke stock
-        $update = mysqli_query($conn, "INSERT INTO stock 
-            (namabarang, varian, keterangan, deskripsi, botol, sprayer, ring, tutup, innerBox, outerBox, partisi) 
-            VALUES 
-            ('$namabarang', '$varian', '$keterangan', '$deskripsi', {$data['botol']}, {$data['sprayer']}, {$data['ring']}, {$data['tutup']}, {$data['innerBox']}, {$data['outerBox']}, {$data['partisi']})");
+    if (!$data) {
+        echo "Data produksi tidak ditemukan.";
+        exit;
     }
 
-    // Proses hapus data dari produksi_a jika update berhasil
-    if ($update) {
+    $namabarang = trim($data['namabarang']);
+    $varian = trim($data['varian']);
+    $po = trim($data['po']); // pastikan ada kolom po di produksi_a
+
+    // Update stok botol_a
+    $updateBotol = mysqli_query($conn, "UPDATE botol_a SET 
+        botol = botol + {$data['botol']} 
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    // Update stok komponen_a
+    $updateKomponen = mysqli_query($conn, "UPDATE komponen_a SET 
+        sprayer = sprayer + {$data['sprayer']},
+        ring = ring + {$data['ring']},
+        tutup = tutup + {$data['tutup']}
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    // Update stok box_a
+    $updateBox = mysqli_query($conn, "UPDATE box_a SET 
+        innerBox = innerBox + {$data['innerBox']},
+        outerBox = outerBox + {$data['outerBox']},
+        partisi = partisi + {$data['partisi']}
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    if ($updateBotol && $updateKomponen && $updateBox) {
+        // Jika semua update berhasil, hapus produksi_a
         $hapus = mysqli_query($conn, "DELETE FROM produksi_b WHERE idbarang='$idb'");
         if ($hapus) {
             header("Location: produksi_b.php");
             exit();
         } else {
-            echo "Gagal hapus data: " . mysqli_error($conn);
+            echo "Gagal hapus data produksi: " . mysqli_error($conn);
         }
     } else {
-        echo "Gagal update stock: " . mysqli_error($conn);
+        echo "Gagal update stok komponen: " . mysqli_error($conn);
     }
 }
 
 // tambah barang produksi C
 if (isset($_POST['C'])) {
-    $namabarang = $_POST['namabarang'];
+    // Ambil dan sanitasi input
+    $namabarang = mysqli_real_escape_string($conn, $_POST['namabarang']);
+    $varian = mysqli_real_escape_string($conn, $_POST['varian']);
+    $po = mysqli_real_escape_string($conn, $_POST['po']);
     $botol = (int)$_POST['botol'];
-    $varian = mysqli_real_escape_string($conn, $_POST['varian']); // pastikan varian disanitasi
     $sprayer = (int)$_POST['sprayer'];
     $ring = (int)$_POST['ring'];
     $tutup = (int)$_POST['tutup'];
     $innerBox = (int)$_POST['innerBox'];
     $outerBox = (int)$_POST['outerBox'];
     $partisi = (int)$_POST['partisi'];
-    $gudang = $_POST['gudang'];
+    $tanggal = date("Y-m-d");
 
-    // Tentukan nama tabel gudang
-    $gudangTable = ($gudang == 'A') ? 'stock' : 'gudangc';
+    // Ambil data stok dari ketiga tabel berdasarkan namabarang, varian, po
+    $q_botol = mysqli_query($conn, "SELECT * FROM botol_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
+    $q_komponen = mysqli_query($conn, "SELECT * FROM komponen_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
+    $q_box = mysqli_query($conn, "SELECT * FROM box_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
 
-    // Ambil stok barang dari tabel gudang
-    $checkStock = mysqli_query($conn, "SELECT * FROM $gudangTable WHERE namabarang = '$namabarang' LIMIT 1");
+    if (mysqli_num_rows($q_botol) > 0 && mysqli_num_rows($q_komponen) > 0 && mysqli_num_rows($q_box) > 0) {
+        $stok_botol = mysqli_fetch_assoc($q_botol);
+        $stok_komponen = mysqli_fetch_assoc($q_komponen);
+        $stok_box = mysqli_fetch_assoc($q_box);
 
-    if (mysqli_num_rows($checkStock) > 0) {
-        $barang = mysqli_fetch_assoc($checkStock);
-        $idbarang = $barang['idbarang'];
+        // Validasi stok cukup
+        $kurang = [];
+        if ($stok_botol['botol'] < $botol) $kurang[] = 'Botol';
+        if ($stok_komponen['sprayer'] < $sprayer) $kurang[] = 'Sprayer';
+        if ($stok_komponen['ring'] < $ring) $kurang[] = 'Ring';
+        if ($stok_komponen['tutup'] < $tutup) $kurang[] = 'Tutup';
+        if ($stok_box['innerBox'] < $innerBox) $kurang[] = 'Inner Box';
+        if ($stok_box['outerBox'] < $outerBox) $kurang[] = 'Outer Box';
+        if ($stok_box['partisi'] < $partisi) $kurang[] = 'Partisi';
 
-        // Cek ketersediaan masing-masing komponen
-        $cukup = true;
-        $pesanKurang = "";
-
-        if ($barang['botol'] < $botol) {
-            $cukup = false;
-            $pesanKurang .= "Botol kurang. ";
-        }
-        if ($barang['varian'] < $varian) {
-            $cukup = false;
-            $pesanKurang .= "varian kurang. ";
-        }
-        if ($barang['sprayer'] < $sprayer) {
-            $cukup = false;
-            $pesanKurang .= "Sprayer kurang. ";
-        }
-        if ($barang['ring'] < $ring) {
-            $cukup = false;
-            $pesanKurang .= "Ring kurang. ";
-        }
-        if ($barang['tutup'] < $tutup) {
-            $cukup = false;
-            $pesanKurang .= "Tutup kurang. ";
-        }
-        if ($barang['innerBox'] < $innerBox) {
-            $cukup = false;
-            $pesanKurang .= "InnerBox kurang. ";
-        }
-        if ($barang['outerBox'] < $outerBox) {
-            $cukup = false;
-            $pesanKurang .= "OuterBox kurang. ";
-        }
-        if ($barang['partisi'] < $partisi) {
-            $cukup = false;
-            $pesanKurang .= "Partisi kurang. ";
+        if (count($kurang) > 0) {
+            echo "❌ Stok tidak mencukupi untuk: " . implode(', ', $kurang);
+            exit;
         }
 
-        if ($cukup) {
-            // Lanjut update stok
-            $update = mysqli_query($conn, "UPDATE $gudangTable SET 
-                botol = botol - $botol,
-                sprayer = sprayer - $sprayer,
-                ring = ring - $ring,
-                tutup = tutup - $tutup,
-                innerBox = innerBox - $innerBox,
-                outerBox = outerBox - $outerBox,
-                partisi = partisi - $partisi
-                WHERE idbarang = '$idbarang'
-            ");
+        // Kurangi stok di botol_a
+        $update_botol = mysqli_query($conn, "UPDATE botol_a SET 
+            botol = botol - $botol 
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
-            if ($update) {
-                // Masukkan ke produksi_b
-                // Cek apakah barang dengan varian sama sudah ada di produksi_a hari ini
-                $tanggalHariIni = date("Y-m-d");
-                $cekProduksi = mysqli_query($conn, "SELECT * FROM produksi_c 
-                    WHERE namabarang = '$namabarang' AND varian = '$varian' AND DATE(tanggal) = '$tanggalHariIni' LIMIT 1");
+        // Kurangi stok di komponen_a
+        $update_komponen = mysqli_query($conn, "UPDATE komponen_a SET 
+            sprayer = sprayer - $sprayer,
+            ring = ring - $ring,
+            tutup = tutup - $tutup
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
-                if (mysqli_num_rows($cekProduksi) > 0) {
-                    // Jika sudah ada, update jumlah komponen
-                    $row = mysqli_fetch_assoc($cekProduksi);
-                    $updateProduksi = mysqli_query($conn, "UPDATE produksi_c SET 
-                        botol = botol + $botol,
-                        sprayer = sprayer + $sprayer,
-                        ring = ring + $ring,
-                        tutup = tutup + $tutup,
-                        innerBox = innerBox + $innerBox,
-                        outerBox = outerBox + $outerBox,
-                        partisi = partisi + $partisi
-                        WHERE idbarang = '$idbarang' AND varian = '$varian' AND DATE(tanggal) = '$tanggalHariIni'
-                    ");
-                } else {
-                    // Jika belum ada, insert baru
-                    $insert = mysqli_query($conn, "INSERT INTO produksi_c 
-                        (idbarang, namabarang, botol, varian, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal)
-                        VALUES ('$idbarang', '$namabarang', '$botol', '$varian', '$sprayer', '$ring', '$tutup', '$innerBox', '$outerBox', '$partisi', NOW())
-                    ");
-                }
+        // Kurangi stok di box_a
+        $update_box = mysqli_query($conn, "UPDATE box_a SET 
+            innerBox = innerBox - $innerBox,
+            outerBox = outerBox - $outerBox,
+            partisi = partisi - $partisi
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
+        if ($update_botol && $update_komponen && $update_box) {
+            // Masukkan ke produksi_a, cek dulu apakah sudah ada untuk tanggal dan varian yang sama
+            $cekProd = mysqli_query($conn, "SELECT * FROM produksi_c WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po' AND DATE(tanggal) = '$tanggal' LIMIT 1");
+
+            if (mysqli_num_rows($cekProd) > 0) {
+                // Update produksi
+                $updateProd = mysqli_query($conn, "UPDATE produksi_c SET
+                    botol = botol + $botol,
+                    sprayer = sprayer + $sprayer,
+                    ring = ring + $ring,
+                    tutup = tutup + $tutup,
+                    innerBox = innerBox + $innerBox,
+                    outerBox = outerBox + $outerBox,
+                    partisi = partisi + $partisi
+                    WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po' AND DATE(tanggal) = '$tanggal'");
             } else {
-                
+                // Insert produksi baru
+                $insertProd = mysqli_query($conn, "INSERT INTO produksi_c
+                    (namabarang, varian, po, botol, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal) VALUES
+                    ('$namabarang', '$varian', '$po', $botol, $sprayer, $ring, $tutup, $innerBox, $outerBox, $partisi, NOW())");
             }
-        } else {
+
            
+        } else {
+            echo "❌ Gagal update stok di salah satu tabel.";
         }
     } else {
-        
+        echo "❌ Data tidak lengkap. Barang harus ada di botol_a, komponen_a, dan box_a.";
     }
 }
 
@@ -706,164 +689,135 @@ if (isset($_POST['hapusbarangproduksic'])) {
     $get = mysqli_query($conn, "SELECT * FROM produksi_c WHERE idbarang='$idb'");
     $data = mysqli_fetch_assoc($get);
 
-    $namabarang = trim($data['namabarang']);
-    $varian = trim($data['varian']);
-    
-    // Ambil keterangan dan deskripsi asli dari stock (gudang_b)
-    $getGudang = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND varian = '$varian'");
-    $gudangData = mysqli_fetch_assoc($getGudang);
-
-    // Ambil keterangan dan deskripsi yang asli dari gudang
-    $keterangan = $gudangData['keterangan'];
-    $deskripsi = $gudangData['deskripsi'];
-
-    // Cek apakah barang sudah ada di stock
-    $cek = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND varian = '$varian'");
-
-    if (mysqli_num_rows($cek) > 0) {
-        // Update data stock yang sudah ada
-        $update = mysqli_query($conn, "UPDATE stock SET 
-            botol = botol + {$data['botol']},
-            sprayer = sprayer + {$data['sprayer']},
-            ring = ring + {$data['ring']},
-            tutup = tutup + {$data['tutup']},
-            innerBox = innerBox + {$data['innerBox']},
-            outerBox = outerBox + {$data['outerBox']},
-            partisi = partisi + {$data['partisi']},
-            keterangan = '$keterangan',
-            deskripsi = '$deskripsi'
-            WHERE namabarang = '$namabarang' AND varian = '$varian'");
-    } else {
-        // Jika barang belum ada, insert data baru ke stock
-        $update = mysqli_query($conn, "INSERT INTO stock 
-            (namabarang, varian, keterangan, deskripsi, botol, sprayer, ring, tutup, innerBox, outerBox, partisi) 
-            VALUES 
-            ('$namabarang', '$varian', '$keterangan', '$deskripsi', {$data['botol']}, {$data['sprayer']}, {$data['ring']}, {$data['tutup']}, {$data['innerBox']}, {$data['outerBox']}, {$data['partisi']})");
+    if (!$data) {
+        echo "Data produksi tidak ditemukan.";
+        exit;
     }
 
-    // Proses hapus data dari produksi_a jika update berhasil
-    if ($update) {
+    $namabarang = trim($data['namabarang']);
+    $varian = trim($data['varian']);
+    $po = trim($data['po']); // pastikan ada kolom po di produksi_c
+
+    // Update stok botol_a
+    $updateBotol = mysqli_query($conn, "UPDATE botol_a SET 
+        botol = botol + {$data['botol']} 
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    // Update stok komponen_a
+    $updateKomponen = mysqli_query($conn, "UPDATE komponen_a SET 
+        sprayer = sprayer + {$data['sprayer']},
+        ring = ring + {$data['ring']},
+        tutup = tutup + {$data['tutup']}
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    // Update stok box_a
+    $updateBox = mysqli_query($conn, "UPDATE box_a SET 
+        innerBox = innerBox + {$data['innerBox']},
+        outerBox = outerBox + {$data['outerBox']},
+        partisi = partisi + {$data['partisi']}
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    if ($updateBotol && $updateKomponen && $updateBox) {
+        // Jika semua update berhasil, hapus produksi_c
         $hapus = mysqli_query($conn, "DELETE FROM produksi_c WHERE idbarang='$idb'");
         if ($hapus) {
             header("Location: produksi_c.php");
             exit();
         } else {
-            echo "Gagal hapus data: " . mysqli_error($conn);
+            echo "Gagal hapus data produksi: " . mysqli_error($conn);
         }
     } else {
-        echo "Gagal update stock: " . mysqli_error($conn);
+        echo "Gagal update stok komponen: " . mysqli_error($conn);
     }
 }
 
 // tambah barang produksi d
 if (isset($_POST['D'])) {
-    $namabarang = $_POST['namabarang'];
+    // Ambil dan sanitasi input
+    $namabarang = mysqli_real_escape_string($conn, $_POST['namabarang']);
+    $varian = mysqli_real_escape_string($conn, $_POST['varian']);
+    $po = mysqli_real_escape_string($conn, $_POST['po']);
     $botol = (int)$_POST['botol'];
-    $varian = mysqli_real_escape_string($conn, $_POST['varian']); // pastikan varian disanitasi
     $sprayer = (int)$_POST['sprayer'];
     $ring = (int)$_POST['ring'];
     $tutup = (int)$_POST['tutup'];
     $innerBox = (int)$_POST['innerBox'];
     $outerBox = (int)$_POST['outerBox'];
     $partisi = (int)$_POST['partisi'];
-    $gudang = $_POST['gudang'];
+    $tanggal = date("Y-m-d");
 
-    // Tentukan nama tabel gudang
-    $gudangTable = ($gudang == 'A') ? 'stock' : 'gudangc';
+    // Ambil data stok dari ketiga tabel berdasarkan namabarang, varian, po
+    $q_botol = mysqli_query($conn, "SELECT * FROM botol_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
+    $q_komponen = mysqli_query($conn, "SELECT * FROM komponen_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
+    $q_box = mysqli_query($conn, "SELECT * FROM box_a WHERE namabarang='$namabarang' AND varian='$varian' AND po='$po' LIMIT 1");
 
-    // Ambil stok barang dari tabel gudang
-    $checkStock = mysqli_query($conn, "SELECT * FROM $gudangTable WHERE namabarang = '$namabarang' LIMIT 1");
+    if (mysqli_num_rows($q_botol) > 0 && mysqli_num_rows($q_komponen) > 0 && mysqli_num_rows($q_box) > 0) {
+        $stok_botol = mysqli_fetch_assoc($q_botol);
+        $stok_komponen = mysqli_fetch_assoc($q_komponen);
+        $stok_box = mysqli_fetch_assoc($q_box);
 
-    if (mysqli_num_rows($checkStock) > 0) {
-        $barang = mysqli_fetch_assoc($checkStock);
-        $idbarang = $barang['idbarang'];
+        // Validasi stok cukup
+        $kurang = [];
+        if ($stok_botol['botol'] < $botol) $kurang[] = 'Botol';
+        if ($stok_komponen['sprayer'] < $sprayer) $kurang[] = 'Sprayer';
+        if ($stok_komponen['ring'] < $ring) $kurang[] = 'Ring';
+        if ($stok_komponen['tutup'] < $tutup) $kurang[] = 'Tutup';
+        if ($stok_box['innerBox'] < $innerBox) $kurang[] = 'Inner Box';
+        if ($stok_box['outerBox'] < $outerBox) $kurang[] = 'Outer Box';
+        if ($stok_box['partisi'] < $partisi) $kurang[] = 'Partisi';
 
-        // Cek ketersediaan masing-masing komponen
-        $cukup = true;
-        $pesanKurang = "";
-
-        if ($barang['botol'] < $botol) {
-            $cukup = false;
-            $pesanKurang .= "Botol kurang. ";
-        }
-        if ($barang['varian'] < $varian) {
-            $cukup = false;
-            $pesanKurang .= "varian kurang. ";
-        }
-        if ($barang['sprayer'] < $sprayer) {
-            $cukup = false;
-            $pesanKurang .= "Sprayer kurang. ";
-        }
-        if ($barang['ring'] < $ring) {
-            $cukup = false;
-            $pesanKurang .= "Ring kurang. ";
-        }
-        if ($barang['tutup'] < $tutup) {
-            $cukup = false;
-            $pesanKurang .= "Tutup kurang. ";
-        }
-        if ($barang['innerBox'] < $innerBox) {
-            $cukup = false;
-            $pesanKurang .= "InnerBox kurang. ";
-        }
-        if ($barang['outerBox'] < $outerBox) {
-            $cukup = false;
-            $pesanKurang .= "OuterBox kurang. ";
-        }
-        if ($barang['partisi'] < $partisi) {
-            $cukup = false;
-            $pesanKurang .= "Partisi kurang. ";
+        if (count($kurang) > 0) {
+            echo "❌ Stok tidak mencukupi untuk: " . implode(', ', $kurang);
+            exit;
         }
 
-        if ($cukup) {
-            // Lanjut update stok
-            $update = mysqli_query($conn, "UPDATE $gudangTable SET 
-                botol = botol - $botol,
-                sprayer = sprayer - $sprayer,
-                ring = ring - $ring,
-                tutup = tutup - $tutup,
-                innerBox = innerBox - $innerBox,
-                outerBox = outerBox - $outerBox,
-                partisi = partisi - $partisi
-                WHERE idbarang = '$idbarang'
-            ");
+        // Kurangi stok di botol_a
+        $update_botol = mysqli_query($conn, "UPDATE botol_a SET 
+            botol = botol - $botol 
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
-            if ($update) {
-                // Masukkan ke produksi_b
-                // Cek apakah barang dengan varian sama sudah ada di produksi_a hari ini
-                $tanggalHariIni = date("Y-m-d");
-                $cekProduksi = mysqli_query($conn, "SELECT * FROM produksi_d 
-                    WHERE namabarang = '$namabarang' AND varian = '$varian' AND DATE(tanggal) = '$tanggalHariIni' LIMIT 1");
+        // Kurangi stok di komponen_a
+        $update_komponen = mysqli_query($conn, "UPDATE komponen_a SET 
+            sprayer = sprayer - $sprayer,
+            ring = ring - $ring,
+            tutup = tutup - $tutup
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
-                if (mysqli_num_rows($cekProduksi) > 0) {
-                    // Jika sudah ada, update jumlah komponen
-                    $row = mysqli_fetch_assoc($cekProduksi);
-                    $updateProduksi = mysqli_query($conn, "UPDATE produksi_d SET 
-                        botol = botol + $botol,
-                        sprayer = sprayer + $sprayer,
-                        ring = ring + $ring,
-                        tutup = tutup + $tutup,
-                        innerBox = innerBox + $innerBox,
-                        outerBox = outerBox + $outerBox,
-                        partisi = partisi + $partisi
-                        WHERE idbarang = '$idbarang' AND varian = '$varian' AND DATE(tanggal) = '$tanggalHariIni'
-                    ");
-                } else {
-                    // Jika belum ada, insert baru
-                    $insert = mysqli_query($conn, "INSERT INTO produksi_d 
-                        (idbarang, namabarang, botol, varian, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal)
-                        VALUES ('$idbarang', '$namabarang', '$botol', '$varian', '$sprayer', '$ring', '$tutup', '$innerBox', '$outerBox', '$partisi', NOW())
-                    ");
-                }
+        // Kurangi stok di box_a
+        $update_box = mysqli_query($conn, "UPDATE box_a SET 
+            innerBox = innerBox - $innerBox,
+            outerBox = outerBox - $outerBox,
+            partisi = partisi - $partisi
+            WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
 
+        if ($update_botol && $update_komponen && $update_box) {
+            // Masukkan ke produksi_a, cek dulu apakah sudah ada untuk tanggal dan varian yang sama
+            $cekProd = mysqli_query($conn, "SELECT * FROM produksi_d WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po' AND DATE(tanggal) = '$tanggal' LIMIT 1");
+
+            if (mysqli_num_rows($cekProd) > 0) {
+                // Update produksi
+                $updateProd = mysqli_query($conn, "UPDATE produksi_d SET
+                    botol = botol + $botol,
+                    sprayer = sprayer + $sprayer,
+                    ring = ring + $ring,
+                    tutup = tutup + $tutup,
+                    innerBox = innerBox + $innerBox,
+                    outerBox = outerBox + $outerBox,
+                    partisi = partisi + $partisi
+                    WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po' AND DATE(tanggal) = '$tanggal'");
             } else {
-                
+                // Insert produksi baru
+                $insertProd = mysqli_query($conn, "INSERT INTO produksi_d
+                    (namabarang, varian, po, botol, sprayer, ring, tutup, innerBox, outerBox, partisi, tanggal) VALUES
+                    ('$namabarang', '$varian', '$po', $botol, $sprayer, $ring, $tutup, $innerBox, $outerBox, $partisi, NOW())");
             }
-        } else {
+
            
+        } else {
+            echo "❌ Gagal update stok di salah satu tabel.";
         }
     } else {
-        
+        echo "❌ Data tidak lengkap. Barang harus ada di botol_a, komponen_a, dan box_a.";
     }
 }
 
@@ -875,57 +829,51 @@ if (isset($_POST['hapusbarangproduksid'])) {
     $get = mysqli_query($conn, "SELECT * FROM produksi_d WHERE idbarang='$idb'");
     $data = mysqli_fetch_assoc($get);
 
-    $namabarang = trim($data['namabarang']);
-    $varian = trim($data['varian']);
-    
-    // Ambil keterangan dan deskripsi asli dari stock (gudang_d)
-    $getGudang = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND varian = '$varian'");
-    $gudangData = mysqli_fetch_assoc($getGudang);
-
-    // Ambil keterangan dan deskripsi yang asli dari gudang
-    $keterangan = $gudangData['keterangan'];
-    $deskripsi = $gudangData['deskripsi'];
-
-    // Cek apakah barang sudah ada di stock
-    $cek = mysqli_query($conn, "SELECT * FROM stock WHERE namabarang = '$namabarang' AND varian = '$varian'");
-
-    if (mysqli_num_rows($cek) > 0) {
-        // Update data stock yang sudah ada
-        $update = mysqli_query($conn, "UPDATE stock SET 
-            botol = botol + {$data['botol']},
-            sprayer = sprayer + {$data['sprayer']},
-            ring = ring + {$data['ring']},
-            tutup = tutup + {$data['tutup']},
-            innerBox = innerBox + {$data['innerBox']},
-            outerBox = outerBox + {$data['outerBox']},
-            partisi = partisi + {$data['partisi']},
-            keterangan = '$keterangan',
-            deskripsi = '$deskripsi'
-            WHERE namabarang = '$namabarang' AND varian = '$varian'");
-    } else {
-        // Jika barang belum ada, insert data baru ke stock
-        $update = mysqli_query($conn, "INSERT INTO stock 
-            (namabarang, varian, keterangan, deskripsi, botol, sprayer, ring, tutup, innerBox, outerBox, partisi) 
-            VALUES 
-            ('$namabarang', '$varian', '$keterangan', '$deskripsi', {$data['botol']}, {$data['sprayer']}, {$data['ring']}, {$data['tutup']}, {$data['innerBox']}, {$data['outerBox']}, {$data['partisi']})");
+    if (!$data) {
+        echo "Data produksi tidak ditemukan.";
+        exit;
     }
 
-    // Proses hapus data dari produksi_a jika update berhasil
-    if ($update) {
+    $namabarang = trim($data['namabarang']);
+    $varian = trim($data['varian']);
+    $po = trim($data['po']); // pastikan ada kolom po di produksi_c
+
+    // Update stok botol_a
+    $updateBotol = mysqli_query($conn, "UPDATE botol_a SET 
+        botol = botol + {$data['botol']} 
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    // Update stok komponen_a
+    $updateKomponen = mysqli_query($conn, "UPDATE komponen_a SET 
+        sprayer = sprayer + {$data['sprayer']},
+        ring = ring + {$data['ring']},
+        tutup = tutup + {$data['tutup']}
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    // Update stok box_a
+    $updateBox = mysqli_query($conn, "UPDATE box_a SET 
+        innerBox = innerBox + {$data['innerBox']},
+        outerBox = outerBox + {$data['outerBox']},
+        partisi = partisi + {$data['partisi']}
+        WHERE namabarang = '$namabarang' AND varian = '$varian' AND po = '$po'");
+
+    if ($updateBotol && $updateKomponen && $updateBox) {
+        // Jika semua update berhasil, hapus produksi_c
         $hapus = mysqli_query($conn, "DELETE FROM produksi_d WHERE idbarang='$idb'");
         if ($hapus) {
             header("Location: produksi_d.php");
             exit();
         } else {
-            echo "Gagal hapus data: " . mysqli_error($conn);
+            echo "Gagal hapus data produksi: " . mysqli_error($conn);
         }
     } else {
-        echo "Gagal update stock: " . mysqli_error($conn);
+        echo "Gagal update stok komponen: " . mysqli_error($conn);
     }
 }
 
-
+//tambah barang shrink
 if (isset($_POST['shrink'])) {
+    $po = $_POST['po'];
     $namabarang = $_POST['namabarang'];
     $jumlahPcs = (int)$_POST['jumlahpcs'];
     $asalProduksi = $_POST['asalproduksi'];
@@ -952,8 +900,8 @@ if (isset($_POST['shrink'])) {
         $updateBarja = mysqli_query($conn, "UPDATE barja SET jumlahpcs = jumlahpcs + $jumlahPcs, tanggal = NOW() WHERE namabarang = '$namabarang' AND varian = '$varian'");
     } else {
         // Jika belum ada, buat baris baru
-        $insertBarja = mysqli_query($conn, "INSERT INTO barja (namabarang, produksi, varian, keterangan, jumlahpcs, tanggal) 
-            VALUES ('$namabarang', '$asalProduksi', '$varian', '$keterangan', '$jumlahPcs', NOW())");
+        $insertBarja = mysqli_query($conn, "INSERT INTO barja (namabarang, po, produksi, varian, keterangan, jumlahpcs, tanggal) 
+            VALUES ('$namabarang', '$po', '$asalProduksi', '$varian', '$keterangan', '$jumlahPcs', NOW())");
     }
 
     // Cek dan kurangi stok produksi
@@ -1003,6 +951,72 @@ if (isset($_POST['shrink'])) {
         echo "<script>alert('Barang tidak ditemukan di produksi.'); window.location.href='barja.php';</script>";
     }
 }
+
+//delete barang shrink
+if(isset($_POST['hapusbarangshrink'])){
+    $idb = $_POST['idb'];
+
+    $hapus = mysqli_query($conn, "delete from barja where idbarang='$idb'");
+    if($hapus){
+        header("Location: barja.php");
+        exit(); // Tambahkan exit setelah header
+    } else {
+        echo "Gagal menambahkan data: " . mysqli_error($conn);
+    }
+};
+
+if (isset($_POST['kirim'])) {
+    $tanggal        = $_POST['tanggal'];
+    $po             = $_POST['po'];
+    $namapenerima   = $_POST['namapenerima'];
+    $namabarang     = $_POST['namabarang'];
+    $varian         = $_POST['varian'];
+    $alamat         = $_POST['alamat'];
+    $jumlahkoli     = (int)$_POST['jumlahkoli'];
+    $jumlahpcs      = (int)$_POST['jumlahpcs'];
+    $keterangan     = $_POST['keterangan'];
+
+    // Validasi
+    if (empty($namabarang) || empty($jumlahpcs) || empty($po)) {
+        echo "<script>alert('PO, Namabarang dan Jumlah PCS wajib diisi!'); window.location.href='pengiriman.php';</script>";
+        exit();
+    }
+
+    // Cek stok dari barja
+    $cekStok = mysqli_query($conn, "SELECT * FROM barja WHERE namabarang = '$namabarang' AND varian = '$varian' LIMIT 1");
+
+    if ($cekStok && mysqli_num_rows($cekStok) > 0) {
+        $dataBarja = mysqli_fetch_assoc($cekStok);
+        $stokSaatIni = (int)$dataBarja['jumlahpcs'];
+
+        if ($stokSaatIni >= $jumlahpcs) {
+            // Kurangi stok barja
+            $updateStok = mysqli_query($conn, "UPDATE barja SET jumlahpcs = jumlahpcs - $jumlahpcs WHERE namabarang = '$namabarang' AND varian = '$varian'");
+
+            if ($updateStok) {
+                // Simpan ke tabel pengiriman
+                $simpan = mysqli_query($conn, "INSERT INTO pengiriman (tanggal, po, namapenerima, namabarang, varian, alamat, jumlahkoli, jumlahpcs, keterangan)
+                    VALUES ('$tanggal', '$po', '$namapenerima', '$namabarang', '$varian', '$alamat', $jumlahkoli, $jumlahpcs, '$keterangan')");
+
+                if ($simpan) {
+                    echo "<script>alert('Data pengiriman berhasil disimpan dan stok dikurangi.'); window.location.href='pengiriman.php';</script>";
+                } else {
+                    $error = mysqli_error($conn);
+                    echo "<script>alert('Gagal menyimpan data pengiriman: $error'); window.location.href='pengiriman.php';</script>";
+                }
+            } else {
+                echo "<script>alert('Gagal mengurangi stok dari barja.'); window.location.href='pengiriman.php';</script>";
+            }
+        } else {
+            echo "<script>alert('Stok tidak mencukupi. Stok saat ini: $stokSaatIni PCS'); window.location.href='pengiriman.php';</script>";
+        }
+    } else {
+        echo "<script>alert('Data barang tidak ditemukan di barja.'); window.location.href='pengiriman.php';</script>";
+    }
+}
+
+
+
 
 
 if (isset($_POST['reject'])) {
@@ -1084,23 +1098,6 @@ if (isset($_POST['reject'])) {
         echo "<script>alert('Barang tidak ditemukan di produksi.'); window.location.href='reject.php';</script>";
     }
 }
-
-
-
-
-//delete barang shrink
-if(isset($_POST['hapusbarangshrink'])){
-    $idb = $_POST['idb'];
-
-    $hapus = mysqli_query($conn, "delete from barja where idbarang='$idb'");
-    if($hapus){
-        header("Location: barja.php");
-        exit(); // Tambahkan exit setelah header
-    } else {
-        echo "Gagal menambahkan data: " . mysqli_error($conn);
-    }
-};
-
 
 
 // Pastikan tombol submit sudah ditekan

@@ -7,12 +7,13 @@
   <li class="nav-item">
   <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseWarehouse" aria-expanded="true" aria-controls="collapseWarehouse">
     <i class="fas fa-boxes"></i>
-    <span>Warehouse</span>
+    <span>Warehouse A</span>
   </a>
   <div id="collapseWarehouse" class="collapse" data-parent="#accordionSidebar">
     <div class="bg-white py-2 collapse-inner rounded">
-    <a class="collapse-item" href="gudang_a.php">Gudang A</a>
-    <a class="collapse-item" href="gudang_c.php">Gudang C</a>
+    <a class="collapse-item" href="botol_a.php">Botol</a>
+    <a class="collapse-item" href="komponen_a.php">Komponen</a>
+    <a class="collapse-item" href="box_a.php">Box</a>
     </div>
   </div>
 </li>

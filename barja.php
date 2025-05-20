@@ -31,6 +31,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>Tanggal</th>
+                                <th>PO</th>
                                 <th>Produksi</th>
                                 <th>Nama Barang</th>
                                 <th>Varian</th>
@@ -50,6 +51,7 @@
                             $i = 1;
                             while ($data = mysqli_fetch_array($ambilsemuadatastock)) {
                                 $tanggal = $data['tanggal'];
+                                $po = $data['po'];
                                 $produksi = $data['produksi'];
                                 $namabarang = $data['namabarang'];
                                 $varian = $data['varian'];
@@ -61,6 +63,7 @@
                                 <tr>
                                     <td><?= $i++; ?></td>
                                     <td><?= $tanggal; ?></td>
+                                    <td><?= $po; ?></td>
                                     <td><?= $produksi; ?></td>
                                     <td><?= $namabarang; ?></td>
                                     <td><?= $varian; ?></td>
@@ -152,6 +155,10 @@
                 </select>
             </div>
             <div class="col-md-6 mb-3">
+              <label for="po">PO</label>
+              <input type="number" class="form-control" name="po" required>
+            </div>
+            <div class="col-md-6 mb-3">
               <label for="namabarang">Nama Barang</label>
               <input type="text" class="form-control" name="namabarang" required>
             </div>
@@ -165,7 +172,7 @@
             </div>
             <div class="col-md-8 mb-3">
               <label for="keterangan">Keterangan</label>
-              <input type="number" class="form-control" name="keterangan" value="0" required>
+              <input type="text" class="form-control" name="keterangan" value="0" required>
             </div>
            
 

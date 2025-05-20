@@ -31,6 +31,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>Tanggal</th>
+                                <th>PO</th>
                                 <th>Nama Penerima</th>
                                 <th>Nama Barang</th>
                                 <th>Varian</th>
@@ -50,6 +51,7 @@
                             $i = 1;
                             while ($data = mysqli_fetch_array($ambilsemuadatastock)) {
                                 $tanggal = $data['tanggal'];
+                                $po = $data['po'];
                                 $namapenerima = $data['namapenerima'];
                                 $namabarang = $data['namabarang'];
                                 $varian = $data['varian'];
@@ -61,6 +63,7 @@
                                 <tr>
                                     <td><?= $i++; ?></td>
                                     <td><?= $tanggal; ?></td>
+                                    <td><?= $po; ?></td>
                                     <td><?= $namapenerima; ?></td>
                                     <td><?= $namabarang; ?></td>
                                     <td><?= $varian; ?></td>
@@ -120,32 +123,36 @@
         <form method="POST" class="custom-form">
           <div class="row">
             <div class="col-md-6 mb-3">
+              <label for="po">PO</label>
+              <input type="number" class="form-control" name="po" required>
+            </div>
+            <div class="col-md-6 mb-3">
               <label for="namapenerima">Nama Penerima</label>
-              <input type="text" class="form-control" name="namabarang" required>
+              <input type="text" class="form-control" name="namapenerima" required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="namabarang">Nama Barang</label>
-              <input type="text" class="form-control" name="keterangan" required>
+              <input type="text" class="form-control" name="namabarang" required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="varian">Varian</label>
-              <input type="text" class="form-control" name="deskripsi"  required>
+              <input type="text" class="form-control" name="varial"  required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="alamat">Alamat</label>
-              <input type="number" class="form-control" name="botol" value="0"  required>
+              <input type="text" class="form-control" name="alamat"  required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="jumlahkoli">Jumlah Koli</label>
-              <input type="number" class="form-control" name="sprayer" value="0" required>
+              <input type="number" class="form-control" name="jumlahkoli" value="0" required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="jumlahpcs">Jumlah PCS</label>
-              <input type="number" class="form-control" name="ring" value="0" required>
+              <input type="number" class="form-control" name="jumlahpcs" value="0" required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="keterangan">Keterangan</label>
-              <input type="number" class="form-control" name="tutup" value="0" required>
+              <input type="text" class="form-control" name="keterangan" required>
             </div>
           
 
